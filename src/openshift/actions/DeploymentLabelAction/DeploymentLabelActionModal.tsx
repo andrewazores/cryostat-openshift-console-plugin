@@ -25,9 +25,7 @@ import {
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
 import {
-  Modal,
   Button,
-  ModalVariant,
   FormSelect,
   FormGroup,
   Form,
@@ -36,6 +34,9 @@ import {
   HelperText,
   HelperTextItem,
   ValidatedOptions,
+  Modal,
+  ModalVariant,
+  ModalFooter,
 } from '@patternfly/react-core';
 import * as React from 'react';
 
@@ -232,14 +233,6 @@ export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind,
         title={t('DEPLOYMENT_ACTION_TITLE')}
         isOpen={true}
         onClose={closeModal}
-        actions={[
-          <Button key="submit" variant="primary" onClick={handleFormSubmit} isDisabled={isDisabled}>
-            {t('SUBMIT')}
-          </Button>,
-          <Button key="cancel" variant="secondary" onClick={closeModal}>
-            {t('CANCEL')}
-          </Button>,
-        ]}
         ouiaId="CryostatDeploymentActionModal"
       >
         <Form>
@@ -269,6 +262,14 @@ export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind,
             </FormHelperText>
           </FormGroup>
         </Form>
+        <ModalFooter>
+          <Button key="submit" variant="primary" onClick={handleFormSubmit} isDisabled={isDisabled}>
+            {t('SUBMIT')}
+          </Button>
+          <Button key="cancel" variant="secondary" onClick={closeModal}>
+            {t('CANCEL')}
+          </Button>
+        </ModalFooter>
       </Modal>
     </React.Fragment>
   );
