@@ -8,7 +8,7 @@ const eslintPluginCypress = require("eslint-plugin-cypress");
 const prettier = require("prettier");
 
 module.exports = [{
-    ignores: ['src/mirage/', '**/node_modules/'],
+    ignores: ['src/mirage/', '**/node_modules/', 'harness/.out/'],
   },
   {
     files: [
@@ -94,6 +94,37 @@ module.exports = [{
     files: [
       'backend/**/*.ts',
       'backend/**/*.js'
+    ],
+    rules: {
+      "no-console": "off"
+    }
+  },
+  {
+    files: [
+      'harness/**/*.ts',
+      'harness/**/*.tsx',
+      'harness/**/*.js'
+    ],
+    languageOptions: {
+      parserOptions: {
+        "project": "./harness/tsconfig.json",
+      },
+      globals: {
+        "__dirname": "readonly",
+        "require": "readonly",
+        "module": "readonly",
+        "cy": "readonly",
+        "Cypress": "readonly",
+        "before": "readonly",
+        "beforeEach": "readonly",
+        "after": "readonly",
+        "afterEach": "readonly",
+      },
+    },
+  },
+  {
+    files: [
+      'harness/**/*.js'
     ],
     rules: {
       "no-console": "off"

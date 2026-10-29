@@ -12,4 +12,5 @@ coverage
 locales/en/plugin__cryostat-plugin.json
 
 cypress/screenshots
+harness/.out
 cypress/videos

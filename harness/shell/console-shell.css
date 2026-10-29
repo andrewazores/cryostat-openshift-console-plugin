@@ -1,0 +1,26 @@
+/*
+ * Imitation of the OpenShift Console content area that hosts a plugin page.
+ *
+ * This is a GUESS, carried over from the original prototype: a fixed-height flex column that scrolls.
+ * It has not been compared with a real Console. Results from the harness mean "reproduced in the
+ * harness", not "verified in the Console". See docs/2026-10-27-component-harness.md.
+ */
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+#console {
+  display: flex;
+  flex-direction: column;
+  height: 800px;
+  width: 1400px;
+  overflow: auto;
+}
+
+#route {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
