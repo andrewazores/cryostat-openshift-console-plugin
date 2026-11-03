@@ -44,7 +44,8 @@
     "cypress/**/.ts",
     "cypress/**/.js",
     "cypress/**/.json",
-    "custom.d.ts"
+    "custom.d.ts",
+    "vitest/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "src/cryostat-web/src/test", "src/cryostat-web/src/itest", "src/cryostat-web/src/mirage"],
   "ts-node": {

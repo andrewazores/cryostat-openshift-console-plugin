@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCryostatVersion, VersionGate } from '@console-plugin/components/VersionGate';
 import { getOperatorCryostatVersion, isVersionEqualOrGreaterThan } from '@console-plugin/utils/utils';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
@@ -20,25 +21,25 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { mockCryostatList } from '../utils';
 
-jest.mock('@i18n/i18nextUtil', () => ({
-  useCryostatTranslation: jest.fn(() => ({
+vi.mock('@i18n/i18nextUtil', () => ({
+  useCryostatTranslation: vi.fn(() => ({
     t: (key: string, opts?: Record<string, unknown>) => (opts ? `${key}:${Object.values(opts).join(',')}` : `${key}`),
   })),
 }));
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  useK8sWatchResource: jest.fn(),
+vi.mock('@openshift-console/dynamic-plugin-sdk', () => ({
+  useK8sWatchResource: vi.fn(),
 }));
 
-jest.mock('@console-plugin/components/CryostatContainer', () => ({
+vi.mock('@console-plugin/components/CryostatContainer', () => ({
   LoadingState: () => <div data-testid="loading-state-mock" />,
   SESSIONSTORAGE_SVC_NAME_KEY: 'mock-name-key',
   SESSIONSTORAGE_SVC_NS_KEY: 'mock-ns-key',
 }));
 
-jest.mock('@console-plugin/utils/utils', () => ({
-  getOperatorCryostatVersion: jest.fn(),
-  isVersionEqualOrGreaterThan: jest.fn(),
+vi.mock('@console-plugin/utils/utils', () => ({
+  getOperatorCryostatVersion: vi.fn(),
+  isVersionEqualOrGreaterThan: vi.fn(),
 }));
 
 const helmCryostat = {
@@ -53,9 +54,9 @@ const helmCryostat = {
 };
 
 describe('VersionGate', () => {
-  const useK8sWatchResourceMock = useK8sWatchResource as jest.Mock;
-  const mockIsVersionEqualOrGreaterThan = isVersionEqualOrGreaterThan as jest.Mock;
-  const mockGetOperatorCryostatVersion = getOperatorCryostatVersion as jest.Mock;
+  const useK8sWatchResourceMock = useK8sWatchResource as Mock;
+  const mockIsVersionEqualOrGreaterThan = isVersionEqualOrGreaterThan as Mock;
+  const mockGetOperatorCryostatVersion = getOperatorCryostatVersion as Mock;
 
   type WatchState = {
     services?: unknown[];
@@ -100,7 +101,7 @@ describe('VersionGate', () => {
   const renderGate = () => render(<GatedPage />);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sessionStorage.clear();
     watchResources();
   });

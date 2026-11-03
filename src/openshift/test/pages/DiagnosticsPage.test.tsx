@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 import DiagnosticsPage from '@console-plugin/pages/DiagnosticsPage';
 import { getOperatorCryostatVersion, isVersionEqualOrGreaterThan } from '@console-plugin/utils/utils';
 import { K8sModel, useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
@@ -20,45 +21,45 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { mockCryostatList } from '../utils';
 
-jest.mock('@i18n/i18nextUtil', () => ({
-  useCryostatTranslation: jest.fn(() => ({
+vi.mock('@i18n/i18nextUtil', () => ({
+  useCryostatTranslation: vi.fn(() => ({
     t: (key: string) => `${key}`,
   })),
 }));
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  k8sGet: jest.fn(() => ({
+vi.mock('@openshift-console/dynamic-plugin-sdk', () => ({
+  k8sGet: vi.fn(() => ({
     model: 'mock-model',
     name: 'mock-plugin',
   })),
-  useActiveNamespace: jest.fn(() => ['mock-namespace', true]),
-  useK8sModel: jest.fn(() => ({}) as K8sModel),
-  useK8sWatchResource: jest.fn(),
+  useActiveNamespace: vi.fn(() => ['mock-namespace', true]),
+  useK8sModel: vi.fn(() => ({}) as K8sModel),
+  useK8sWatchResource: vi.fn(),
 }));
 
-jest.mock('@console-plugin/components/CryostatContainer', () => ({
+vi.mock('@console-plugin/components/CryostatContainer', () => ({
   CryostatContainer: ({ children }) => <div data-testid="cryostat-container-mock">{children}</div>,
   LoadingState: () => <div data-testid="loading-state-mock" />,
   SESSIONSTORAGE_SVC_NAME_KEY: 'mock-name-key',
   SESSIONSTORAGE_SVC_NS_KEY: 'mock-ns-key',
 }));
 
-jest.mock('@console-plugin/utils/utils', () => ({
-  getOperatorCryostatVersion: jest.fn(),
-  isVersionEqualOrGreaterThan: jest.fn(),
+vi.mock('@console-plugin/utils/utils', () => ({
+  getOperatorCryostatVersion: vi.fn(),
+  isVersionEqualOrGreaterThan: vi.fn(),
 }));
 
-jest.mock('@app/Diagnostics/CaptureDiagnostics', () => ({
+vi.mock('@app/Diagnostics/CaptureDiagnostics', () => ({
   CaptureDiagnostics: () => <div data-testid="capture-diagnostics-mock">Diagnostics</div>,
 }));
 
 describe('DiagnosticsPage', () => {
-  const useK8sWatchResourceMock = useK8sWatchResource as jest.Mock;
-  const mockIsVersionEqualOrGreaterThan = isVersionEqualOrGreaterThan as jest.Mock;
-  const mockGetOperatorCryostatVersion = getOperatorCryostatVersion as jest.Mock;
+  const useK8sWatchResourceMock = useK8sWatchResource as Mock;
+  const mockIsVersionEqualOrGreaterThan = isVersionEqualOrGreaterThan as Mock;
+  const mockGetOperatorCryostatVersion = getOperatorCryostatVersion as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sessionStorage.clear();
     useK8sWatchResourceMock.mockImplementation((resource) => {
       if (resource.groupVersionKind.kind === 'Service') {

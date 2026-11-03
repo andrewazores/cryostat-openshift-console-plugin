@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { describe, expect, it } from 'vitest';
 import * as utils from '@console-plugin/utils/utils';
 import { isVersionEqualOrGreaterThan } from '@console-plugin/utils/utils';
-import '@testing-library/jest-dom';
 
 describe('Utils', () => {
   it('does not export checkNavHighlighting (DOM mutation hack removed)', () => {

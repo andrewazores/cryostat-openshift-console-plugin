@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContainerSelectionStep } from '@console-plugin/actions/DeploymentLabelAction/ContainerSelectionStep';
 import { Container, LOG_LEVELS } from '@console-plugin/actions/DeploymentLabelAction/utils';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 
-jest.mock('@i18n/i18nextUtil', () => ({
-  useCryostatTranslation: jest.fn(() => ({
+vi.mock('@i18n/i18nextUtil', () => ({
+  useCryostatTranslation: vi.fn(() => ({
     t: (key: string) => key,
   })),
 }));
 
 describe('ContainerSelectionStep', () => {
-  const mockOnChange = jest.fn();
+  const mockOnChange = vi.fn();
 
   const singleContainer: Container[] = [
     {
@@ -57,7 +57,7 @@ describe('ContainerSelectionStep', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Single Container', () => {

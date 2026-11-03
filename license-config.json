@@ -1,7 +1,7 @@
 {
     "license":"LICENSE",
     "licenseFormats": {
-        "ts|tsx": {
+        "ts|tsx|mts": {
             "prepend": "/*",
             "append": " */",
             "eachLine": {

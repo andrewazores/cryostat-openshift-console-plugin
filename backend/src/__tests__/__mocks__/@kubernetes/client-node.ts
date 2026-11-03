@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { vi } from 'vitest';
+
 export class KubeConfig {
-  loadFromCluster = jest.fn();
-  applyToHTTPSOptions = jest.fn();
-  makeApiClient = jest.fn();
+  loadFromCluster = vi.fn();
+  applyToHTTPSOptions = vi.fn();
+  makeApiClient = vi.fn();
 }
 
 export class CoreV1Api {
-  readNamespacedService = jest.fn();
+  readNamespacedService = vi.fn();
 }

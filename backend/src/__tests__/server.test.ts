@@ -27,32 +27,36 @@ import { EventEmitter } from 'events';
 import * as k8s from '@kubernetes/client-node';
 import express from 'express';
 import request from 'supertest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { Server } from '../server';
 
 const mockK8sApi = {
-  readNamespacedService: jest.fn(),
+  readNamespacedService: vi.fn(),
 };
 
 const mockKubeConfig = {
-  loadFromCluster: jest.fn(),
-  applyToHTTPSOptions: jest.fn(),
-  makeApiClient: jest.fn(() => mockK8sApi),
+  loadFromCluster: vi.fn(),
+  applyToHTTPSOptions: vi.fn(),
+  makeApiClient: vi.fn(() => mockK8sApi),
 } as unknown as k8s.KubeConfig;
 
 // Mock http-proxy to avoid actual network calls
-jest.mock('http-proxy', () => ({
-  createProxyServer: jest.fn(() => ({
-    web: jest.fn((req, res, opts, _callback) => {
-      // Simulate successful proxy by capturing the corrected URL
-      // This allows us to verify the path was correctly processed
-      res.status(200).json({
-        proxied: true,
-        method: req.method,
-        url: req.url,
-        target: opts.target,
-      });
-    }),
-    ws: jest.fn(),
-  })),
+vi.mock('http-proxy', () => ({
+  default: {
+    createProxyServer: vi.fn(() => ({
+      web: vi.fn((req, res, opts, _callback) => {
+        // Simulate successful proxy by capturing the corrected URL
+        // This allows us to verify the path was correctly processed
+        res.status(200).json({
+          proxied: true,
+          method: req.method,
+          url: req.url,
+          target: opts.target,
+        });
+      }),
+      ws: vi.fn(),
+    })),
+  },
 }));
 
 describe('Server Express Routing Tests', () => {
@@ -77,7 +81,6 @@ describe('Server Express Routing Tests', () => {
       },
     });
 
-    const { Server } = require('../server');
     const server = new Server(mockKubeConfig);
     app = server.getApp();
   });
@@ -103,7 +106,7 @@ describe('Server Express Routing Tests', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Health endpoint', () => {
@@ -418,13 +421,13 @@ describe('Server Express Routing Tests', () => {
 
   describe('WebSocket upgrade', () => {
     let httpsServer: EventEmitter;
-    let proxyWs: jest.Mock;
+    let proxyWs: vi.Mock;
 
     const upgrade = async (url: string, sockOverrides: Record<string, any> = {}) => {
       const sock = Object.assign(new EventEmitter(), {
         writable: true,
-        end: jest.fn(),
-        destroy: jest.fn(),
+        end: vi.fn(),
+        destroy: vi.fn(),
         ...sockOverrides,
       });
       const req = { url, headers: {} };
@@ -434,12 +437,11 @@ describe('Server Express Routing Tests', () => {
     };
 
     beforeEach(() => {
-      const { Server } = require('../server');
-      const server = new Server(mockKubeConfig);
+        const server = new Server(mockKubeConfig);
       httpsServer = new EventEmitter();
       (server as any).httpsServer = httpsServer;
       (server as any).setupWebSocketUpgrade({});
-      proxyWs = server.getProxy().ws as jest.Mock;
+      proxyWs = server.getProxy().ws as vi.Mock;
       proxyWs.mockClear();
     });
 
@@ -460,17 +462,17 @@ describe('Server Express Routing Tests', () => {
     });
 
     it('should destroy rejected writable socket after a delay', async () => {
-      jest.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick'] });
+      vi.useFakeTimers({ doNotFake: ['setImmediate', 'nextTick'] });
       try {
         const sock = await upgrade('/upstream/api/notifications');
 
         expect(sock.end).toHaveBeenCalledWith(expect.stringContaining('400 Bad Request'));
         expect(sock.destroy).not.toHaveBeenCalled();
 
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
         expect(sock.destroy).toHaveBeenCalledTimes(1);
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     });
 

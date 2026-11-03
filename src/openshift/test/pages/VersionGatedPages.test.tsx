@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DiagnosticsPage from '@console-plugin/pages/DiagnosticsPage';
 import HeapDumpAnalysisPage from '@console-plugin/pages/HeapDumpAnalysisPage';
 import HeapDumpsPage from '@console-plugin/pages/HeapDumpsPage';
@@ -29,14 +30,14 @@ import React from 'react';
 // resolve against the wrong store.
 const mockRenderOrder: string[] = [];
 
-jest.mock('@console-plugin/components/CryostatContainer', () => ({
+vi.mock('@console-plugin/components/CryostatContainer', () => ({
   CryostatContainer: ({ children }) => {
     mockRenderOrder.push('CryostatContainer');
     return <div data-testid="cryostat-container-mock">{children}</div>;
   },
 }));
 
-jest.mock('@console-plugin/components/VersionGate', () => ({
+vi.mock('@console-plugin/components/VersionGate', () => ({
   useCryostatVersion: () => {
     mockRenderOrder.push('useCryostatVersion');
     return { version: '9.9.9', resolved: true };
@@ -52,28 +53,28 @@ jest.mock('@console-plugin/components/VersionGate', () => ({
   ),
 }));
 
-jest.mock('@app/Diagnostics/CaptureDiagnostics', () => ({
+vi.mock('@app/Diagnostics/CaptureDiagnostics', () => ({
   CaptureDiagnostics: () => <div data-testid="capture-diagnostics-mock" />,
 }));
-jest.mock('@app/Diagnostics/AnalyzeThreadDumps', () => ({
+vi.mock('@app/Diagnostics/AnalyzeThreadDumps', () => ({
   __esModule: true,
   default: () => <div data-testid="analyze-thread-dumps-mock" />,
 }));
-jest.mock('@app/Diagnostics/Analysis/ThreadDumpAnalysis', () => ({
+vi.mock('@app/Diagnostics/Analysis/ThreadDumpAnalysis', () => ({
   __esModule: true,
   default: () => <div data-testid="thread-dump-analysis-mock" />,
 }));
-jest.mock('@app/Diagnostics/AnalyzeHeapDumps', () => ({
+vi.mock('@app/Diagnostics/AnalyzeHeapDumps', () => ({
   __esModule: true,
   default: () => <div data-testid="analyze-heap-dumps-mock" />,
 }));
-jest.mock('@app/Diagnostics/Analysis/HeapDumps/HeapDumpAnalysis', () => ({
+vi.mock('@app/Diagnostics/Analysis/HeapDumps/HeapDumpAnalysis', () => ({
   HeapDumpAnalysis: () => <div data-testid="heap-dump-analysis-mock" />,
 }));
-jest.mock('@app/RecordingAnalytics/RecordingAnalytics', () => ({
+vi.mock('@app/RecordingAnalytics/RecordingAnalytics', () => ({
   RecordingAnalytics: () => <div data-testid="recording-analytics-mock" />,
 }));
-jest.mock('@app/Triggers/CaptureSmartTriggers', () => ({
+vi.mock('@app/Triggers/CaptureSmartTriggers', () => ({
   __esModule: true,
   default: () => <div data-testid="capture-smart-triggers-mock" />,
 }));

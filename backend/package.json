@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "build:noCheck": "tsc --noCheck",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
     "start": "node dist/main.js"
   },
   "author": "",
@@ -25,14 +25,13 @@
     "@types/express": "5.0.6",
     "@types/follow-redirects": "1.14.4",
     "@types/http-proxy": "1.17.17",
-    "@types/jest": "29.5.14",
     "@types/morgan": "1.9.10",
     "@types/node": "22.19.17",
     "@types/qs": "6.15.1",
     "@types/supertest": "6.0.3",
-    "jest": "29.7.0",
+    "@vitest/coverage-v8": "5.1.0",
     "supertest": "7.2.2",
-    "ts-jest": "29.4.14",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
   }
 }

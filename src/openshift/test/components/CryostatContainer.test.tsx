@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { type Mock, type MockInstance, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CryostatContainer,
   SESSIONSTORAGE_SVC_NAME_KEY,
@@ -20,6 +21,10 @@ import {
 } from '@console-plugin/components/CryostatContainer';
 import { CryostatPageShell } from '@console-plugin/components/CryostatPageShell';
 import { CryostatServiceContext } from '@console-plugin/components/CryostatServiceContext';
+import { ApiService } from '@app/Shared/Services/Api.service';
+import { NotificationChannel } from '@app/Shared/Services/NotificationChannel.service';
+import { SettingsService } from '@app/Shared/Services/Settings.service';
+import { TargetsService } from '@app/Shared/Services/Targets.service';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { act, render } from '@testing-library/react';
 import React from 'react';
@@ -29,77 +34,83 @@ import React from 'react';
 // can be rendered in isolation without real RxJS pipelines or K8s clients.
 // ---------------------------------------------------------------------------
 
-const mockDestroy = jest.fn();
+const { mockDestroy } = vi.hoisted(() => ({ mockDestroy: vi.fn() }));
 
-jest.mock('@app/Shared/Services/Api.service', () => ({
-  ApiService: jest.fn().mockImplementation(() => ({ testBaseServer: jest.fn() })),
+vi.mock('@app/Shared/Services/Api.service', () => ({
+  ApiService: vi.fn().mockImplementation(function () {
+    return { testBaseServer: vi.fn() };
+  }),
 }));
-jest.mock('@app/Shared/Services/Login.service', () => ({ LoginService: jest.fn() }));
-jest.mock('@app/Shared/Services/NotificationChannel.service', () => ({
-  NotificationChannel: jest.fn().mockImplementation(() => ({
-    destroy: mockDestroy,
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-  })),
+vi.mock('@app/Shared/Services/Login.service', () => ({ LoginService: vi.fn() }));
+vi.mock('@app/Shared/Services/NotificationChannel.service', () => ({
+  NotificationChannel: vi.fn().mockImplementation(function () {
+    return {
+      destroy: mockDestroy,
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+    };
+  }),
 }));
-jest.mock('@app/Shared/Services/Report.service', () => ({ ReportService: jest.fn() }));
-jest.mock('@app/Shared/Services/HeapDumpReport.service', () => ({ HeapDumpReportService: jest.fn() }));
-jest.mock('@app/Shared/Services/Target.service', () => ({ TargetService: jest.fn() }));
-jest.mock('@app/Shared/Services/TargetAlias.service', () => ({ TargetAliasService: jest.fn() }));
-jest.mock('@app/Shared/Services/Targets.service', () => ({
-  TargetsService: jest.fn().mockImplementation(() => ({
-    queryForTargets: jest
-      .fn()
-      .mockReturnValue({ subscribe: jest.fn().mockImplementation(() => ({ unsubscribe: jest.fn() })) }),
-  })),
+vi.mock('@app/Shared/Services/Report.service', () => ({ ReportService: vi.fn() }));
+vi.mock('@app/Shared/Services/HeapDumpReport.service', () => ({ HeapDumpReportService: vi.fn() }));
+vi.mock('@app/Shared/Services/Target.service', () => ({ TargetService: vi.fn() }));
+vi.mock('@app/Shared/Services/TargetAlias.service', () => ({ TargetAliasService: vi.fn() }));
+vi.mock('@app/Shared/Services/Targets.service', () => ({
+  TargetsService: vi.fn().mockImplementation(function () {
+    return {
+      queryForTargets: vi
+        .fn()
+        .mockReturnValue({ subscribe: vi.fn().mockImplementation(() => ({ unsubscribe: vi.fn() })) }),
+    };
+  }),
 }));
-jest.mock('@app/Shared/Services/Settings.service', () => ({
-  SettingsService: jest.fn().mockImplementation(() => ({
-    visibleNotificationsCount: jest
-      .fn()
-      .mockReturnValue({ subscribe: jest.fn().mockImplementation(() => ({ unsubscribe: jest.fn() })) }),
-    notificationsEnabledFor: jest.fn().mockReturnValue(true),
-  })),
+vi.mock('@app/Shared/Services/Settings.service', () => ({
+  SettingsService: vi.fn().mockImplementation(function () {
+    return {
+      visibleNotificationsCount: vi
+        .fn()
+        .mockReturnValue({ subscribe: vi.fn().mockImplementation(() => ({ unsubscribe: vi.fn() })) }),
+      notificationsEnabledFor: vi.fn().mockReturnValue(true),
+    };
+  }),
 }));
-jest.mock('@app/Dashboard/Charts/jfr/JFRMetricsChartController', () => ({
-  JFRMetricsChartController: jest.fn(),
+vi.mock('@app/Dashboard/Charts/jfr/JFRMetricsChartController', () => ({
+  JFRMetricsChartController: vi.fn(),
 }));
-jest.mock('@app/Dashboard/Charts/mbean/MBeanMetricsChartController', () => ({
-  MBeanMetricsChartController: jest.fn(),
+vi.mock('@app/Dashboard/Charts/mbean/MBeanMetricsChartController', () => ({
+  MBeanMetricsChartController: vi.fn(),
 }));
 
-jest.mock('@console-plugin/services/PluginContext', () => ({
-  pluginServices: { plugin: { proxyUrl: jest.fn() } },
+vi.mock('@console-plugin/services/PluginContext', () => ({
+  pluginServices: { plugin: { proxyUrl: vi.fn() } },
 }));
-jest.mock('@console-plugin/components/CryostatSelector', () => ({
+vi.mock('@console-plugin/components/CryostatSelector', () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock('@app/Shared/Redux/ReduxStore', () => ({
+vi.mock('@app/Shared/Redux/ReduxStore', () => ({
   store: {
-    getState: jest.fn().mockReturnValue({}),
-    dispatch: jest.fn(),
-    subscribe: jest.fn().mockReturnValue(jest.fn()),
-    [Symbol.observable]: jest.fn(),
+    getState: vi.fn().mockReturnValue({}),
+    dispatch: vi.fn(),
+    subscribe: vi.fn().mockReturnValue(vi.fn()),
+    [Symbol.observable]: vi.fn(),
   },
 }));
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  consoleFetch: jest.fn(),
-  k8sGet: jest.fn().mockResolvedValue({}),
-  useActiveNamespace: jest.fn().mockReturnValue(['test-ns']),
-  useK8sModel: jest.fn().mockReturnValue([{}]),
-  useK8sWatchResource: jest.fn().mockReturnValue([[], false, undefined]),
+vi.mock('@openshift-console/dynamic-plugin-sdk', () => ({
+  consoleFetch: vi.fn(),
+  k8sGet: vi.fn().mockResolvedValue({}),
+  useActiveNamespace: vi.fn().mockReturnValue(['test-ns']),
+  useK8sModel: vi.fn().mockReturnValue([{}]),
+  useK8sWatchResource: vi.fn().mockReturnValue([[], false, undefined]),
 }));
-jest.mock('@app/Shared/Services/Notifications.service', () => {
-  const { createContext } = jest.requireActual<typeof import('react')>('react');
+vi.mock('@app/Shared/Services/Notifications.service', async () => {
+  const { createContext } = await vi.importActual<typeof import('react')>('react');
   return {
     NotificationsInstance: {
-      notifications: jest.fn().mockReturnValue({
-        pipe: jest
-          .fn()
-          .mockReturnValue({ subscribe: jest.fn().mockImplementation(() => ({ unsubscribe: jest.fn() })) }),
+      notifications: vi.fn().mockReturnValue({
+        pipe: vi.fn().mockReturnValue({ subscribe: vi.fn().mockImplementation(() => ({ unsubscribe: vi.fn() })) }),
       }),
-      clearAll: jest.fn(),
+      clearAll: vi.fn(),
     },
     NotificationsContext: createContext({}),
   };
@@ -108,14 +119,10 @@ jest.mock('@app/Shared/Services/Notifications.service', () => {
 // ---------------------------------------------------------------------------
 
 const makeShellContext = () => {
-  const { NotificationChannel } = jest.requireMock('@app/Shared/Services/NotificationChannel.service');
-  const { ApiService } = jest.requireMock('@app/Shared/Services/Api.service');
-  const { TargetsService } = jest.requireMock('@app/Shared/Services/Targets.service');
-  const { SettingsService } = jest.requireMock('@app/Shared/Services/Settings.service');
-  const channel = new (NotificationChannel as jest.Mock)();
-  const api = new (ApiService as jest.Mock)();
-  const targets = new (TargetsService as jest.Mock)();
-  const settings = new (SettingsService as jest.Mock)();
+  const channel = new (NotificationChannel as Mock)();
+  const api = new (ApiService as Mock)();
+  const targets = new (TargetsService as Mock)();
+  const settings = new (SettingsService as Mock)();
   const serviceCtx = { notificationChannel: channel, api, targets, settings } as any;
   return {
     service: { namespace: 'ns-a', name: 'cryostat-a' },
@@ -129,20 +136,18 @@ const makeShellContext = () => {
     noSelection: false,
     enableRoute: false,
     searchNamespace: 'ns-a',
-    onSelectInstance: jest.fn(),
-    openCryostatRoute: jest.fn(),
+    onSelectInstance: vi.fn(),
+    openCryostatRoute: vi.fn(),
   };
 };
 
 describe('CryostatPageShell — does not manage WebSocket connection (Flaw 3)', () => {
-  const { NotificationChannel } = jest.requireMock('@app/Shared/Services/NotificationChannel.service');
-
   beforeEach(() => {
-    (NotificationChannel as jest.Mock).mockClear();
+    (NotificationChannel as Mock).mockClear();
   });
 
   it('never calls connect() — connection is owned by the persistent hook, not the per-page shell', () => {
-    const channel = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
+    const channel = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
     const ctx = makeShellContext();
     ctx.serviceContext.notificationChannel = channel;
 
@@ -156,7 +161,7 @@ describe('CryostatPageShell — does not manage WebSocket connection (Flaw 3)', 
   });
 
   it('never calls disconnect() on mount or unmount — teardown is owned by the persistent hook', () => {
-    const channel = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
+    const channel = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
     const ctx = makeShellContext();
     ctx.serviceContext.notificationChannel = channel;
 
@@ -173,19 +178,19 @@ describe('CryostatPageShell — does not manage WebSocket connection (Flaw 3)', 
 });
 
 describe('useCryostatServiceContextValue — WebSocket connection lifecycle', () => {
-  const { NotificationChannel } = jest.requireMock('@app/Shared/Services/NotificationChannel.service');
-
   beforeEach(() => {
     mockDestroy.mockClear();
-    (NotificationChannel as jest.Mock).mockClear();
+    (NotificationChannel as Mock).mockClear();
   });
 
   it('calls connect() once when serviceContext is first established', async () => {
-    const channel = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
-    (NotificationChannel as jest.Mock).mockImplementationOnce(() => channel);
+    const channel = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
+    (NotificationChannel as Mock).mockImplementationOnce(function () {
+      return channel;
+    });
 
     const matchingInstance = { metadata: { namespace: 'ns-a', name: 'cryostat-a' } };
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[matchingInstance], true, undefined]);
+    (useK8sWatchResource as Mock).mockReturnValue([[matchingInstance], true, undefined]);
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NS_KEY, 'ns-a');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NAME_KEY, 'cryostat-a');
 
@@ -201,11 +206,13 @@ describe('useCryostatServiceContextValue — WebSocket connection lifecycle', ()
   });
 
   it('does not call connect() again on re-render when the selected instance has not changed', async () => {
-    const channel = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
-    (NotificationChannel as jest.Mock).mockImplementationOnce(() => channel);
+    const channel = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
+    (NotificationChannel as Mock).mockImplementationOnce(function () {
+      return channel;
+    });
 
     const matchingInstance = { metadata: { namespace: 'ns-a', name: 'cryostat-a' } };
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[matchingInstance], true, undefined]);
+    (useK8sWatchResource as Mock).mockReturnValue([[matchingInstance], true, undefined]);
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NS_KEY, 'ns-a');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NAME_KEY, 'cryostat-a');
 
@@ -229,13 +236,19 @@ describe('useCryostatServiceContextValue — WebSocket connection lifecycle', ()
   });
 
   it('calls destroy() on the old channel and connect() on the new one when the instance changes', async () => {
-    const channelA = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
-    const channelB = { connect: jest.fn(), disconnect: jest.fn(), destroy: jest.fn() };
-    (NotificationChannel as jest.Mock).mockImplementationOnce(() => channelA).mockImplementationOnce(() => channelB);
+    const channelA = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
+    const channelB = { connect: vi.fn(), disconnect: vi.fn(), destroy: vi.fn() };
+    (NotificationChannel as Mock)
+      .mockImplementationOnce(function () {
+        return channelA;
+      })
+      .mockImplementationOnce(function () {
+        return channelB;
+      });
 
     const instanceA = { metadata: { namespace: 'ns-a', name: 'cryostat-a' } };
     const instanceB = { metadata: { namespace: 'ns-b', name: 'cryostat-b' } };
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[instanceA, instanceB], true, undefined]);
+    (useK8sWatchResource as Mock).mockReturnValue([[instanceA, instanceB], true, undefined]);
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NS_KEY, 'ns-a');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NAME_KEY, 'cryostat-a');
 
@@ -256,7 +269,7 @@ describe('useCryostatServiceContextValue — WebSocket connection lifecycle', ()
     unmount();
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NS_KEY, 'ns-b');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NAME_KEY, 'cryostat-b');
-    (useK8sWatchResource as jest.Mock).mockReturnValue([[instanceB], true, undefined]);
+    (useK8sWatchResource as Mock).mockReturnValue([[instanceB], true, undefined]);
 
     await act(async () => {
       ({ unmount } = render(<CryostatContainer />));
@@ -270,11 +283,11 @@ describe('useCryostatServiceContextValue — WebSocket connection lifecycle', ()
 });
 
 describe('NamespacedContainer — sessionStorage guard (Flaw 4)', () => {
-  const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
-  let sessionStorageSpy: jest.SpyInstance;
+  const mockUseK8sWatchResource = useK8sWatchResource as Mock;
+  let sessionStorageSpy: MockInstance;
 
   beforeEach(() => {
-    sessionStorageSpy = jest.spyOn(Storage.prototype, 'setItem');
+    sessionStorageSpy = vi.spyOn(Storage.prototype, 'setItem');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NS_KEY, 'ns-a');
     sessionStorage.setItem(SESSIONSTORAGE_SVC_NAME_KEY, 'cryostat-a');
     sessionStorageSpy.mockClear();

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeploymentLabelActionModal } from '@console-plugin/actions/DeploymentLabelAction/DeploymentLabelActionModal';
 import {
   mockCryostatList,
@@ -25,18 +26,17 @@ import {
 import { K8sModel, useAccessReview, useK8sWatchResource, k8sPatch } from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 
-jest.mock('@i18n/i18nextUtil', () => ({
-  useCryostatTranslation: jest.fn(() => ({
+vi.mock('@i18n/i18nextUtil', () => ({
+  useCryostatTranslation: vi.fn(() => ({
     t: (key: string) => `${key}`,
   })),
 }));
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  useAccessReview: jest.fn(),
-  useK8sWatchResource: jest.fn(),
-  k8sPatch: jest.fn(),
+vi.mock('@openshift-console/dynamic-plugin-sdk', () => ({
+  useAccessReview: vi.fn(),
+  useK8sWatchResource: vi.fn(),
+  k8sPatch: vi.fn(),
 }));
 
 const mockDeploymentModel = {
@@ -45,11 +45,11 @@ const mockDeploymentModel = {
 
 describe('DeploymentLabelActionModal', () => {
   // Note: the following functions return similar but different second boolean values, loaded vs. loading respectively
-  const useK8sWatchResourceMock = useK8sWatchResource as jest.Mock;
-  const useAccessReviewMock = useAccessReview as jest.Mock;
+  const useK8sWatchResourceMock = useK8sWatchResource as Mock;
+  const useAccessReviewMock = useAccessReview as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     useAccessReviewMock.mockReturnValue([true, false]);
     useK8sWatchResourceMock.mockImplementation((resource) => {
       if (resource.groupVersionKind.kind === 'Service') {
@@ -68,7 +68,7 @@ describe('DeploymentLabelActionModal', () => {
         kind={mockDeploymentModel}
         resource={mockDeploymentResource}
         isOpen={true}
-        closeModal={jest.fn()}
+        closeModal={vi.fn()}
       />,
     );
   }
@@ -135,7 +135,7 @@ describe('DeploymentLabelActionModal', () => {
       await userEvent.click(finishButton);
       expect(k8sPatch).toHaveBeenCalled();
 
-      const callArgs = (k8sPatch as jest.Mock).mock.calls[0][0];
+      const callArgs = (k8sPatch as Mock).mock.calls[0][0];
       expect(callArgs.model).toEqual(mockDeploymentModel);
       expect(callArgs.queryOptions).toEqual({ name: 'test-app', ns: 'test-namespace' });
 
@@ -256,7 +256,7 @@ describe('DeploymentLabelActionModal', () => {
       await userEvent.click(finishButton);
       expect(k8sPatch).toHaveBeenCalled();
 
-      const callArgs = (k8sPatch as jest.Mock).mock.calls[0][0];
+      const callArgs = (k8sPatch as Mock).mock.calls[0][0];
       const patches = callArgs.data;
 
       // Verify callback port patch is included
@@ -289,7 +289,7 @@ describe('DeploymentLabelActionModal', () => {
       expect(k8sPatch).toHaveBeenCalled();
     });
 
-    const callArgs = (k8sPatch as jest.Mock).mock.calls[0][0];
+    const callArgs = (k8sPatch as Mock).mock.calls[0][0];
     const patches = callArgs.data;
 
     // Verify callback port patch is NOT included
@@ -337,7 +337,7 @@ describe('DeploymentLabelActionModal', () => {
       await userEvent.click(finishButton);
       expect(k8sPatch).toHaveBeenCalled();
 
-      const callArgs = (k8sPatch as jest.Mock).mock.calls[0][0];
+      const callArgs = (k8sPatch as Mock).mock.calls[0][0];
       const patches = callArgs.data;
 
       // Verify callback port removal patch is included

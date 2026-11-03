@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 import DeploymentDecorator from '@console-plugin/actions/DeploymentLabelAction/DeploymentDecorator';
 import {
   mockOperatorCryostatList,
@@ -21,12 +22,11 @@ import {
 } from '@console-plugin/test/utils';
 import { k8sGet, K8sModel, useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  k8sGet: jest.fn(),
-  useK8sModel: jest.fn(() => ({}) as K8sModel),
-  useK8sWatchResource: jest.fn(),
+vi.mock('@openshift-console/dynamic-plugin-sdk', () => ({
+  k8sGet: vi.fn(),
+  useK8sModel: vi.fn(() => [{} as K8sModel, false]),
+  useK8sWatchResource: vi.fn(),
 }));
 
 const mockRoute = {
@@ -36,11 +36,11 @@ const mockRoute = {
 };
 
 describe('DeploymentDecorator', () => {
-  const useK8sWatchResourceMock = useK8sWatchResource as jest.Mock;
-  const k8sGetMock = k8sGet as jest.Mock;
+  const useK8sWatchResourceMock = useK8sWatchResource as Mock;
+  const k8sGetMock = k8sGet as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     k8sGetMock.mockResolvedValue(mockRoute);
   });
 
